@@ -1,0 +1,42 @@
+name: Examen de codigo
+on:
+  - push
+  - workflow-dispatcher
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  calificacion-automatica:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Instalación de Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+          cache: 'pip'
+      - name: Instalación de dependencias
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install ruff pytest
+      - name: Calidad de codigo
+        uses: classroom-resources/autograding-io-grader@v1
+        with:
+          test-name: 'Ruff'
+          command: 'ruff check --output-format=github calculadora/'
+          expected-output: 'All checks passed!'
+          comparison-method: 'included'
+          max-score: 30
+      - name: Pruebas unitarias y de integración
+        id: evaluacion
+        uses: classroom-resources/autograding-python-grader@v1
+        with:
+          timeout: 10
+          max-score: 70
+      - name: Calificacion
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          EVALUACION_RESULTS: "${{steps.evaluacion.outputs.result}}"
+        with:
+          runners: evaluacion
