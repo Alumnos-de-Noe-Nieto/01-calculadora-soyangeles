@@ -7,6 +7,9 @@ Ejemplos válidos: XVI, MDCLXVI, XIV (sustracción válida)
 Ejemplos inválidos: IVX, IIV, VIV
 """
 
+VALORES = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100, "D": 500, "M": 1000}
+SUSTRACCIONES_VALIDAS = {"IV", "IX", "XL", "XC", "CD", "CM"}
+
 def validar_orden_descendente(cadena: str) -> bool:
     """
     Valida que los símbolos estén en orden descendente de valor (izquierda a derecha).
@@ -44,4 +47,24 @@ def validar_orden_descendente(cadena: str) -> bool:
         >>> validar_orden_descendente("VIV")
         False
     """
-    raise NotImplementedError()
+    i = 0
+    while i < len(cadena) - 1:
+        par = cadena[i : i + 2]
+
+        if par in SUSTRACCIONES_VALIDAS:
+            # No puede haber repetición antes (ej: IIV)
+            if i > 0 and cadena[i - 1] == cadena[i]:
+                return False
+            # El símbolo DESPUÉS de la sustracción debe ser menor al mayor del par
+            if i + 2 < len(cadena):
+                valor_despues = VALORES[cadena[i + 2]]
+                valor_mayor_par = VALORES[cadena[i + 1]]
+                if valor_despues >= valor_mayor_par:
+                    return False
+            i += 2
+        else:
+            if VALORES[cadena[i]] < VALORES[cadena[i + 1]]:
+                return False
+            i += 1
+
+    return True

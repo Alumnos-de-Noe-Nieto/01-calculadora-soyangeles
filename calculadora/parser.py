@@ -52,7 +52,19 @@ def evaluar_expresion(expresion: str) -> list[Token]:
         >>> evaluar_expresion("")
         []
     """
-    raise NotImplementedError()
+    tokens = tokenizar_expresion(expresion)
+
+    sin_espacios = [t for t in tokens if t.tipo != "ESPACIO"]
+
+    if not sin_espacios:
+        return []
+
+    if not validar_estructura_tokens(tokens):
+        raise ExpresionInvalida(
+            f'La expresión "{expresion}" tiene una estructura inválida'
+        )
+
+    return tokens
 
 
 def tokenizar_expresion(expresion: str) -> list[Token]:
@@ -95,7 +107,32 @@ def tokenizar_expresion(expresion: str) -> list[Token]:
         >>> tokenizar_expresion("X+V")
         [Token("ROMANO", "X", 0), Token("SUMA", "+", 1), Token("ROMANO", "V", 2)]
     """
-    raise NotImplementedError()
+    tokens = []
+    i = 0
+
+    while i < len(expresion):
+        caracter = expresion[i]
+
+        if caracter == " ":
+            tokens.append(Token("ESPACIO", " ", i))
+            i += 1
+        elif caracter == "+":
+            tokens.append(Token("SUMA", "+", i))
+            i += 1
+        elif caracter == "-":
+            tokens.append(Token("RESTA", "-", i))
+            i += 1
+        elif caracter in "IVXLCDM":
+            inicio = i
+            while i < len(expresion) and expresion[i] in "IVXLCDM":
+                i += 1
+            tokens.append(Token("ROMANO", expresion[inicio:i], inicio))
+        else:
+            raise ExpresionInvalida(
+                f"Carácter inválido '{caracter}' en posición {i}"
+            )
+
+    return tokens
 
 
 def validar_estructura_tokens(tokens: list[Token]) -> bool:
@@ -129,4 +166,20 @@ def validar_estructura_tokens(tokens: list[Token]) -> bool:
         >>> validar_estructura_tokens([Token("SUMA", "+", 0), Token("ROMANO", "X", 1)])
         False
     """
-    raise NotImplementedError()
+    sin_espacios = [t for t in tokens if t.tipo != "ESPACIO"]
+
+    if len(sin_espacios) < 3:
+        return False
+
+    if len(sin_espacios) % 2 == 0:
+        return False
+
+    for i, token in enumerate(sin_espacios):
+        if i % 2 == 0:
+            if token.tipo != "ROMANO":
+                return False
+        else:
+            if token.tipo not in ("SUMA", "RESTA"):
+                return False
+
+    return True
