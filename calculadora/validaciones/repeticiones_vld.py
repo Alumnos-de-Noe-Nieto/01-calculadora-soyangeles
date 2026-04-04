@@ -5,6 +5,8 @@ Los símbolos V, L y D NO pueden repetirse.
 Ejemplos válidos: V, L, D, MCMXCIV
 Ejemplos inválidos: VV, LL, DD
 """
+SIMBOLOS_UNICOS = {"V", "L", "D"}
+MAX_REPETICIONES = 1
 
 def validar_repeticiones_vld(cadena: str) -> bool:
     """
@@ -34,4 +36,7 @@ def validar_repeticiones_vld(cadena: str) -> bool:
         >>> validar_repeticiones_vld("DD")
         False
     """
-    raise NotImplementedError()
+    for simbolo in SIMBOLOS_UNICOS:
+        if simbolo * (MAX_REPETICIONES + 1) in cadena:
+            return False
+    return True
